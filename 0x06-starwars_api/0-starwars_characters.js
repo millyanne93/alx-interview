@@ -1,40 +1,28 @@
-#!/usr/bin/env node
+#!/usr/bin/node
+
 const request = require('request');
-const API_URL = 'https://swapi-api.hbtn.io/api';
 
-if (process.argv.length !== 3) {
-  console.error('Usage: ./0-starwars_characters.js <Movie ID>');
-  process.exit(1);
-}
+const filmNum = process.argv[2] + '/';
+const filmURL = 'https://swapi-api.hbtn.io/api/films/';
 
-const movieId = process.argv[2];
-const movieUrl = `${API_URL}/films/${movieId}/`;
+// Makes an API request to get film information
+request(filmURL + filmNum, async function (err, res, body) {
+  if (err) return console.error(err);
 
-request(movieUrl, (err, _, body) => {
-  if (err) {
-    console.error('Error fetching movie details:', err);
-    return;
-  }
+  // Parse the response body to get the list of character URLs
+  const charURLList = JSON.parse(body).characters;
 
-  try {
-    const charactersURL = JSON.parse(body).characters;
-    const charactersPromises = charactersURL.map(url => 
-      new Promise((resolve, reject) => {
-        request(url, (promiseErr, __, charactersReqBody) => {
-          if (promiseErr) {
-            reject(promiseErr);
-          } else {
-            resolve(JSON.parse(charactersReqBody).name);
-          }
-        });
-      })
-    );
+  // Iterare through the character URLs and fect character information
+  // Make a request to each character URL
+  for (const charURL of charURLList) {
+    await new Promise(function (resolve, reject) {
+      request(charURL, function (err, res, body) {
+        if (err) return console.error(err);
 
-    Promise.all(charactersPromises)
-      .then(names => console.log(names.join('\n')))
-      .catch(allErr => console.error('Error fetching character names:', allErr));
-
-  } catch (parseErr) {
-    console.error('Error parsing movie details:', parseErr);
+        // Parse the charcter nformation and print the character's name Resolve the promise to indicate completion
+        console.log(JSON.parse(body).name);
+        resolve();
+      });
+    });
   }
 });
