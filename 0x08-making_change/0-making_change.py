@@ -5,6 +5,7 @@ meet a given amount total
 """
 from collections import deque
 
+
 def makeChange(coins, total):
     """ fewest number of coins needed to meet total """
     if total <= 0:
@@ -27,7 +28,8 @@ def makeChange(coins, total):
         for coin in coins:
             new_amount = current_amount + coin
 
-            # If the new amount is within the target and hasn't been visited yet
+            # If the new amount is within the target
+            # and hasn't been visited yet
             if new_amount <= total and new_amount not in visited:
                 visited.add(new_amount)
                 queue.append((new_amount, num_coins + 1))
